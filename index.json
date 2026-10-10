@@ -1,0 +1,665 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10131a">
+  <meta name="description" content="Pro Calculator EN/MM - English and Myanmar scientific calculator">
+  <title>Pro Calculator EN/MM</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+
+  <style>
+    :root {
+      --bg: #10131a;
+      --panel: #1b202b;
+      --button: #292f3d;
+      --text: #f5f7fa;
+      --muted: #a8b0c0;
+      --accent: #43d9b0;
+      --operator: #24483f;
+      --border: #343c4c;
+      --danger: #5a2934;
+    }
+
+    body.light {
+      --bg: #eef1f7;
+      --panel: #ffffff;
+      --button: #e7eaf1;
+      --text: #171b25;
+      --muted: #626b7b;
+      --accent: #087e65;
+      --operator: #cdeee4;
+      --border: #d5dbe5;
+      --danger: #f5dfe4;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, Arial, sans-serif;
+      min-height: 100vh;
+      padding: 14px;
+      transition: background .2s, color .2s;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0 16px;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    button, select {
+      font: inherit;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      background: var(--button);
+    }
+
+    button {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    button:active { transform: scale(.97); }
+
+    .small-btn {
+      padding: 9px 10px;
+      font-size: 13px;
+    }
+
+    .screen {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 18px 16px;
+      margin-bottom: 12px;
+      min-height: 145px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      overflow: hidden;
+    }
+
+    #expression {
+      min-height: 30px;
+      text-align: right;
+      color: var(--muted);
+      font-size: 20px;
+      overflow-wrap: anywhere;
+    }
+
+    #result {
+      text-align: right;
+      font-size: clamp(30px, 9vw, 43px);
+      font-weight: 650;
+      margin-top: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .screen-tools {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .mode-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .mode-row select {
+      padding: 9px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .key {
+      min-height: 57px;
+      font-size: 20px;
+      font-weight: 550;
+      border-radius: 16px;
+      padding: 6px 2px;
+    }
+
+    .key.fn { color: var(--accent); }
+    .key.op { background: var(--operator); }
+    .key.danger { background: var(--danger); }
+    .key.equals {
+      background: var(--accent);
+      color: #081b16;
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    .key.wide { grid-column: span 2; }
+
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      margin-top: 14px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    h2 { font-size: 16px; margin: 0; }
+
+    #history {
+      display: grid;
+      gap: 8px;
+    }
+
+    .history-item {
+      background: var(--button);
+      padding: 10px;
+      border-radius: 12px;
+      overflow-wrap: anywhere;
+      cursor: pointer;
+    }
+
+    .history-expression {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .history-answer {
+      font-size: 18px;
+      margin-top: 4px;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    footer {
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+      padding: 18px 4px 10px;
+    }
+
+    @media (min-width: 600px) {
+      body { padding-top: 28px; }
+      .key { min-height: 64px; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <h1 id="appTitle">Pro Calculator</h1>
+        <div class="subtitle">English • မြန်မာ</div>
+      </div>
+      <div class="top-actions">
+        <button class="small-btn" id="languageBtn">EN / MM</button>
+        <button class="small-btn" id="themeBtn" aria-label="Change theme">☀️</button>
+      </div>
+    </header>
+
+    <section class="screen" aria-label="Calculator display">
+      <div id="expression" aria-live="polite">0</div>
+      <div id="result" aria-live="polite">0</div>
+      <div class="screen-tools">
+        <button class="small-btn" id="copyBtn">Copy Answer</button>
+      </div>
+    </section>
+
+    <div class="mode-row">
+      <select id="angleMode" aria-label="Angle mode">
+        <option value="DEG">DEG — Degrees</option>
+        <option value="RAD">RAD — Radians</option>
+      </select>
+      <button class="small-btn" id="historyToggle">History</button>
+    </div>
+
+    <section class="grid" id="keypad">
+      <button class="key danger" data-action="clear">AC</button>
+      <button class="key danger" data-action="delete">DEL</button>
+      <button class="key op" data-value="(">(</button>
+      <button class="key op" data-value=")">)</button>
+
+      <button class="key fn" data-value="sin(">sin</button>
+      <button class="key fn" data-value="cos(">cos</button>
+      <button class="key fn" data-value="tan(">tan</button>
+      <button class="key op" data-value="÷">÷</button>
+
+      <button class="key fn" data-value="sqrt(">√</button>
+      <button class="key fn" data-value="^2">x²</button>
+      <button class="key fn" data-value="^">xʸ</button>
+      <button class="key op" data-value="×">×</button>
+
+      <button class="key fn" data-value="log(">log</button>
+      <button class="key fn" data-value="ln(">ln</button>
+      <button class="key fn" data-value="%">%</button>
+      <button class="key op" data-value="−">−</button>
+
+      <button class="key" data-value="7">7</button>
+      <button class="key" data-value="8">8</button>
+      <button class="key" data-value="9">9</button>
+      <button class="key op" data-value="+">+</button>
+
+      <button class="key" data-value="4">4</button>
+      <button class="key" data-value="5">5</button>
+      <button class="key" data-value="6">6</button>
+      <button class="key fn" data-value="π">π</button>
+
+      <button class="key" data-value="1">1</button>
+      <button class="key" data-value="2">2</button>
+      <button class="key" data-value="3">3</button>
+      <button class="key fn" data-value="e">e</button>
+
+      <button class="key" data-value="0">0</button>
+      <button class="key" data-value=".">.</button>
+      <button class="key fn" data-action="sign">±</button>
+      <button class="key equals" data-action="equals">=</button>
+    </section>
+
+    <section class="section" id="historySection" hidden>
+      <div class="section-head">
+        <h2 id="historyTitle">Calculation History</h2>
+        <button class="small-btn" id="clearHistoryBtn">Clear</button>
+      </div>
+      <div id="history">
+        <div class="empty">No history yet.</div>
+      </div>
+    </section>
+
+    <footer>Pro Calculator EN/MM • PWA</footer>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const $ = id => document.getElementById(id);
+      const burmeseDigits = "၀၁၂၃၄၅၆၇၈၉";
+
+      let expression = "";
+      let result = "0";
+      let language = localStorage.getItem("calcLanguage") || "EN";
+      let history = readHistory();
+      let justCalculated = false;
+
+      function readHistory() {
+        try {
+          const saved = JSON.parse(localStorage.getItem("calcHistory") || "[]");
+          return Array.isArray(saved) ? saved : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function toEnglish(value) {
+        return String(value).replace(/[၀-၉]/g, d =>
+          String(burmeseDigits.indexOf(d))
+        );
+      }
+
+      function toMyanmar(value) {
+        return String(value).replace(/\d/g, d => burmeseDigits[Number(d)]);
+      }
+
+      function localize(value) {
+        return language === "MM" ? toMyanmar(value) : String(value);
+      }
+
+      function displayExpression(value) {
+        return localize(value || "0");
+      }
+
+      function updateDisplay() {
+        $("expression").textContent = displayExpression(expression);
+        $("result").textContent = localize(result);
+        $("languageBtn").textContent =
+          language === "EN" ? "EN / MM" : "MM / EN";
+        $("copyBtn").textContent =
+          language === "EN" ? "Copy Answer" : "အဖြေကူးယူ";
+        $("historyToggle").textContent =
+          language === "EN" ? "History" : "မှတ်တမ်း";
+        $("historyTitle").textContent =
+          language === "EN" ? "Calculation History" : "တွက်ချက်မှုမှတ်တမ်း";
+        $("clearHistoryBtn").textContent =
+          language === "EN" ? "Clear" : "ဖျက်မည်";
+        $("appTitle").textContent =
+          language === "EN" ? "Pro Calculator" : "Pro Calculator";
+        document.documentElement.lang = language === "MM" ? "my" : "en";
+        renderHistory();
+      }
+
+      function addValue(value) {
+        if (justCalculated && /[0-9.πe]/.test(value[0] || "")) {
+          expression = "";
+        }
+        justCalculated = false;
+        expression += value;
+        result = preview(expression);
+        updateDisplay();
+      }
+
+      function clearAll() {
+        expression = "";
+        result = "0";
+        justCalculated = false;
+        updateDisplay();
+      }
+
+      function deleteLast() {
+        if (justCalculated) {
+          expression = "";
+          result = "0";
+          justCalculated = false;
+        } else {
+          expression = expression.slice(0, -1);
+          result = preview(expression);
+        }
+        updateDisplay();
+      }
+
+      function normalizeExpression(input) {
+        let s = toEnglish(input)
+          .replace(/π/g, "PI")
+          .replace(/×/g, "*")
+          .replace(/÷/g, "/")
+          .replace(/−/g, "-")
+          .replace(/\s+/g, "");
+
+        if (!s) throw Error("Empty expression");
+
+        // Convert display functions to JavaScript Math functions.
+        s = s.replace(/\bsin\(/g, "sin(")
+             .replace(/\bcos\(/g, "cos(")
+             .replace(/\btan\(/g, "tan(")
+             .replace(/\bsqrt\(/g, "sqrt(")
+             .replace(/\blog\(/g, "log(")
+             .replace(/\bln\(/g, "ln(")
+             .replace(/\bPI\b/g, "PI")
+             .replace(/\be\b/g, "E");
+
+        // Accept only calculator characters and known function names.
+        const scrubbed = s.replace(
+          /sin|cos|tan|sqrt|log|ln|PI|E/g, ""
+        );
+
+        if (!/^[0-9+\-*/^().%]*$/.test(scrubbed)) {
+          throw Error("Invalid expression");
+        }
+
+        // Percent means percentage of the preceding value.
+        s = s.replace(/(\d+(?:\.\d+)?)%/g, "($1/100)");
+
+        // Power operator.
+        s = s.replace(/\^/g, "**");
+
+        // Insert multiplication for common cases like 2π or 2(3+4).
+        s = s.replace(/(\d|\))(?=(PI|E|sin\(|cos\(|tan\(|sqrt\(|log\(|ln\(|\())/g, "$1*");
+        s = s.replace(/(PI|E|\))(?=\d)/g, "$1*");
+
+        return s;
+      }
+
+      function calculate(input) {
+        const jsExpression = normalizeExpression(input);
+        const mode = $("angleMode").value;
+
+        const sin = x => Math.sin(mode === "DEG" ? x * Math.PI / 180 : x);
+        const cos = x => Math.cos(mode === "DEG" ? x * Math.PI / 180 : x);
+        const tan = x => Math.tan(mode === "DEG" ? x * Math.PI / 180 : x);
+        const sqrt = x => Math.sqrt(x);
+        const log = x => Math.log10(x);
+        const ln = x => Math.log(x);
+        const PI = Math.PI;
+        const E = Math.E;
+
+        // The expression is restricted to calculator syntax above.
+        const value = Function(
+          "sin", "cos", "tan", "sqrt", "log", "ln", "PI", "E",
+          '"use strict"; return (' + jsExpression + ');'
+        )(sin, cos, tan, sqrt, log, ln, PI, E);
+
+        if (typeof value !== "number" || !Number.isFinite(value)) {
+          throw Error("Math error");
+        }
+
+        return Number(value.toPrecision(12)).toString();
+      }
+
+      function preview(input) {
+        if (!input) return "0";
+        try {
+          return calculate(input);
+        } catch {
+          return result === "Error" ? "0" : result;
+        }
+      }
+
+      function equals() {
+        if (!expression) return;
+        try {
+          const answer = calculate(expression);
+          result = answer;
+          history.unshift({
+            expression,
+            result: answer,
+            time: Date.now()
+          });
+          history = history.slice(0, 100);
+          localStorage.setItem("calcHistory", JSON.stringify(history));
+          justCalculated = true;
+        } catch {
+          result = "Error";
+          justCalculated = false;
+        }
+        updateDisplay();
+      }
+
+      function changeSign() {
+        if (!expression) {
+          expression = "-";
+        } else if (/^-/.test(expression)) {
+          expression = expression.slice(1);
+        } else {
+          expression = "-(" + expression + ")";
+        }
+        result = preview(expression);
+        justCalculated = false;
+        updateDisplay();
+      }
+
+      function renderHistory() {
+        const container = $("history");
+        container.replaceChildren();
+
+        if (!history.length) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = language === "EN"
+            ? "No history yet."
+            : "တွက်ချက်မှုမှတ်တမ်း မရှိသေးပါ။";
+          container.appendChild(empty);
+          return;
+        }
+
+        history.forEach(item => {
+          const row = document.createElement("div");
+          row.className = "history-item";
+          row.tabIndex = 0;
+
+          const exp = document.createElement("div");
+          exp.className = "history-expression";
+          exp.textContent = localize(item.expression);
+
+          const ans = document.createElement("div");
+          ans.className = "history-answer";
+          ans.textContent = "= " + localize(item.result);
+
+          row.append(exp, ans);
+
+          const selectItem = () => {
+            expression = item.expression;
+            result = item.result;
+            justCalculated = true;
+            updateDisplay();
+          };
+
+          row.addEventListener("click", selectItem);
+          row.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              selectItem();
+            }
+          });
+
+          container.appendChild(row);
+        });
+      }
+
+      $("keypad").addEventListener("click", event => {
+        const button = event.target.closest("button");
+        if (!button) return;
+
+        const value = button.dataset.value;
+        const action = button.dataset.action;
+
+        if (value !== undefined) {
+          addValue(value);
+        } else if (action === "clear") {
+          clearAll();
+        } else if (action === "delete") {
+          deleteLast();
+        } else if (action === "equals") {
+          equals();
+        } else if (action === "sign") {
+          changeSign();
+        }
+      });
+
+      $("languageBtn").addEventListener("click", () => {
+        language = language === "EN" ? "MM" : "EN";
+        localStorage.setItem("calcLanguage", language);
+        updateDisplay();
+      });
+
+      $("themeBtn").addEventListener("click", () => {
+        document.body.classList.toggle("light");
+        const isLight = document.body.classList.contains("light");
+        localStorage.setItem("calcTheme", isLight ? "light" : "dark");
+        $("themeBtn").textContent = isLight ? "🌙" : "☀️";
+      });
+
+      $("copyBtn").addEventListener("click", async () => {
+        const text = localize(result);
+        try {
+          await navigator.clipboard.writeText(text);
+          $("copyBtn").textContent =
+            language === "EN" ? "Copied!" : "ကူးယူပြီးပါပြီ";
+          setTimeout(() => {
+            $("copyBtn").textContent =
+              language === "EN" ? "Copy Answer" : "အဖြေကူးယူ";
+          }, 1400);
+        } catch {
+          const area = document.createElement("textarea");
+          area.value = text;
+          document.body.appendChild(area);
+          area.select();
+          try { document.execCommand("copy"); } catch {}
+          area.remove();
+        }
+      });
+
+      $("historyToggle").addEventListener("click", () => {
+        $("historySection").hidden = !$("historySection").hidden;
+      });
+
+      $("clearHistoryBtn").addEventListener("click", () => {
+        history = [];
+        localStorage.removeItem("calcHistory");
+        renderHistory();
+      });
+
+      $("angleMode").addEventListener("change", () => {
+        if (expression) result = preview(expression);
+        updateDisplay();
+      });
+
+      document.addEventListener("keydown", event => {
+        if (/^[0-9.]$/.test(event.key)) addValue(event.key);
+        else if (event.key === "+") addValue("+");
+        else if (event.key === "-") addValue("−");
+        else if (event.key === "*") addValue("×");
+        else if (event.key === "/") {
+          event.preventDefault();
+          addValue("÷");
+        }
+        else if (event.key === "Enter" || event.key === "=") equals();
+        else if (event.key === "Backspace") deleteLast();
+        else if (event.key === "Escape") clearAll();
+        else if (event.key === "(" || event.key === ")") addValue(event.key);
+      });
+
+      if (localStorage.getItem("calcTheme") === "light") {
+        document.body.classList.add("light");
+        $("themeBtn").textContent = "🌙";
+      }
+
+      updateDisplay();
+
+      if ("serviceWorker" in navigator &&
+          (location.protocol === "https:" || location.hostname === "localhost")) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js")
+            .catch(error => console.error("Service Worker error:", error));
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

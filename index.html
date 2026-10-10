@@ -1,758 +1,226 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="my">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#101114">
-<meta name="description" content="Pro Calculator EN/MM - Scientific Calculator, Myanmar Weight and Length Converter">
-<title>Pro Calculator EN/MM</title>
+<meta name="theme-color" content="#111827">
+<title>Pro Calculator</title>
 <style>
-:root {
-  color-scheme: dark;
-  --bg:#101114;
-  --panel:#191b22;
-  --key:#292c35;
-  --text:#f6f7fb;
-  --muted:#a2a6b5;
-  --green:#a7f36b;
-  --orange:#ffb15f;
-  --border:#343742;
-}
-* { box-sizing:border-box; }
-body {
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:system-ui,"Noto Sans Myanmar",sans-serif;
-}
-button,input,select { font:inherit; }
-button { cursor:pointer; touch-action:manipulation; }
-.app {
-  width:100%;
-  max-width:520px;
-  min-height:100vh;
-  margin:auto;
-  padding: max(15px,env(safe-area-inset-top)) 15px
-           max(22px,env(safe-area-inset-bottom));
-}
-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:8px;
-  margin-bottom:20px;
-}
-.brand { font-weight:850; font-size:19px; }
-.brand span { color:var(--green); }
-.small-btn,.nav-btn {
-  color:var(--text);
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:10px 12px;
-}
-.nav {
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:7px;
-  margin-bottom:17px;
-}
-.nav-btn {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  gap:5px;
-  min-height:66px;
-  padding:9px 3px;
-  font-size:12px;
-}
-.nav-btn .ico { font-size:21px; }
-.nav-btn.active {
-  color:var(--green);
-  border-color:var(--green);
-  background:#20291e;
-}
-.view { display:none; }
-.view.active { display:block; }
-.screen {
-  background:var(--panel);
-  border-radius:23px;
-  padding:18px;
-  min-height:143px;
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-end;
-  margin-bottom:13px;
-  overflow:hidden;
-}
-.hint { color:var(--muted); font-size:13px; }
-#expression {
-  width:100%;
-  margin-top:13px;
-  padding:0;
-  border:0;
-  outline:0;
-  background:transparent;
-  color:var(--text);
-  font-size:30px;
-  text-align:right;
-}
-#result {
-  min-height:39px;
-  margin-top:8px;
-  color:var(--green);
-  font-size:34px;
-  font-weight:800;
-  text-align:right;
-  overflow-wrap:anywhere;
-}
-.toolbar {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:12px;
-}
-.mode { display:flex; gap:7px; }
-.small-btn.active {
-  color:var(--green);
-  border-color:var(--green);
-}
-.grid {
-  display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:8px;
-}
-.key {
-  min-width:0;
-  height:clamp(47px,12vw,60px);
-  border:0;
-  border-radius:15px;
-  background:var(--key);
-  color:var(--text);
-  font-size:clamp(14px,3.8vw,18px);
-  font-weight:650;
-}
-.key.fn { color:var(--green); background:#222a22; }
-.key.op { color:var(--orange); background:#33271f; }
-.key.danger { color:#ff9191; background:#342326; }
-.key.equal { background:var(--green); color:#172010; font-size:24px; }
-.key:active,.nav-btn:active { filter:brightness(1.25); }
-.panel {
-  padding:17px;
-  background:var(--panel);
-  border:1px solid #242630;
-  border-radius:21px;
-  margin-bottom:14px;
-}
-h2 { font-size:20px; margin:0 0 7px; }
-.subtitle { color:var(--muted); font-size:13px; margin-bottom:18px; }
-.field-label {
-  display:block;
-  color:var(--muted);
-  font-size:13px;
-  margin:13px 0 7px;
-}
-.field,.select {
-  display:block;
-  width:100%;
-  padding:14px;
-  border-radius:13px;
-  background:#242630;
-  border:1px solid var(--border);
-  color:var(--text);
-  outline:none;
-}
-.field:focus,.select:focus { border-color:var(--green); }
-.unit-row {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-.swap-row {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin:12px 0;
-}
-.swap {
-  border:1px solid var(--border);
-  background:#252830;
-  color:var(--green);
-  border-radius:50%;
-  width:46px;
-  height:46px;
-  font-size:22px;
-}
-.result-box {
-  margin-top:16px;
-  padding:16px;
-  background:#20291e;
-  border:1px solid #3c5335;
-  border-radius:15px;
-}
-.result-label { color:#b8d5a5; font-size:13px; }
-.converter-result {
-  color:var(--green);
-  font-size:clamp(23px,6vw,31px);
-  font-weight:800;
-  overflow-wrap:anywhere;
-  margin-top:7px;
-}
-.full-btn {
-  width:100%;
-  padding:14px;
-  border:0;
-  border-radius:13px;
-  background:var(--green);
-  color:#172010;
-  font-weight:800;
-  margin-top:14px;
-}
-.note {
-  color:var(--muted);
-  font-size:12px;
-  line-height:1.7;
-  margin-top:13px;
-}
-.footer {
-  text-align:center;
-  color:#737787;
-  font-size:12px;
-  padding:22px 0 4px;
-}
-@media(min-width:430px) {
-  .app { padding-left:19px; padding-right:19px; }
-  .grid { gap:10px; }
-}
+:root{--bg:#0b1020;--panel:#151d30;--panel2:#202b42;--text:#f4f7ff;--muted:#a8b4cc;--accent:#7c9cff;--accent2:#a7f3d0;--danger:#ff8f9b;--line:#2d3a55}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(160deg,#10182c,#080c17);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans Myanmar","Myanmar Text",sans-serif;min-height:100vh}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0}
+.app{max-width:780px;margin:auto;padding:16px 14px 28px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+h1{font-size:1.35rem;margin:0;font-weight:800;letter-spacing:.2px}
+.sub{color:var(--muted);font-size:.82rem;margin-top:3px}
+select,.small-btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:9px 10px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}
+.tab{padding:12px 5px;border-radius:13px;background:var(--panel);color:var(--muted);border:1px solid var(--line);font-weight:700}
+.tab.active{background:var(--accent);color:#081126;border-color:transparent}
+.panel{background:rgba(21,29,48,.96);border:1px solid var(--line);border-radius:20px;padding:15px;margin-bottom:12px;box-shadow:0 12px 30px #0002}
+.display{background:#080d19;border:1px solid var(--line);border-radius:15px;padding:14px;margin-bottom:12px;min-height:104px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+.expression{font-size:1rem;color:var(--muted);min-height:25px;overflow-wrap:anywhere;text-align:right}
+.result{font-size:2rem;font-weight:750;text-align:right;overflow-wrap:anywhere;min-height:40px}
+.tools{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.toolgroup{display:flex;gap:7px;flex-wrap:wrap}
+.pill{padding:8px 11px;border-radius:10px;background:var(--panel2);color:var(--text);border:1px solid var(--line);font-size:.86rem}
+.pill.on{background:var(--accent2);color:#06261d}
+.keys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.key{min-height:52px;border-radius:14px;background:var(--panel2);color:var(--text);font-size:1.05rem;font-weight:650;border:1px solid #ffffff08}
+.key:active,.pill:active,.tab:active{transform:scale(.98)}
+.key.op{color:#b9c9ff;background:#253251}
+.key.eq{background:var(--accent);color:#071126;font-weight:850}
+.key.clear{color:var(--danger)}
+.key.fn{color:var(--accent2);font-size:.95rem}
+#science{display:none;margin-bottom:9px}
+#science.show{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+#science .key{min-height:43px;font-size:.9rem}
+.section-title{font-size:1.05rem;font-weight:800;margin:0 0 12px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+label{color:var(--muted);font-size:.9rem}
+input, .field select{width:100%;padding:12px;background:#0b1222;border:1px solid var(--line);border-radius:12px;color:var(--text);min-width:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.action{background:var(--accent);color:#081126;border-radius:12px;padding:12px 14px;font-weight:800;width:100%}
+.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.output{padding:14px;border-radius:13px;background:#0b1222;border:1px solid var(--line);margin-top:10px;overflow-wrap:anywhere}
+.note{font-size:.82rem;color:var(--muted);line-height:1.6;margin:10px 0 0}
+.hidden{display:none!important}
+footer{text-align:center;color:var(--muted);font-size:.78rem;padding:12px}
+@media(min-width:560px){.app{padding:22px}.key{min-height:58px}.result{font-size:2.3rem}}
 </style>
 </head>
 <body>
-<main class="app">
-  <header>
-    <div class="brand">PRO <span>CALCULATOR</span></div>
-    <button class="small-btn" id="langBtn">မြန်မာ</button>
-  </header>
+<div class="app">
+<header>
+  <div><h1 id="appTitle">Pro Calculator</h1><div class="sub" id="subtitle">နေ့စဉ်တွက်ချက်မှုအတွက်</div></div>
+  <select id="language" aria-label="Language">
+    <option value="my">မြန်မာ</option><option value="en">English</option>
+  </select>
+</header>
 
-  <nav class="nav">
-    <button class="nav-btn active" data-view="calc">
-      <span class="ico">🧮</span><span data-en="Calculator" data-my="ဂဏန်းတွက်စက်">Calculator</span>
-    </button>
-    <button class="nav-btn" data-view="weight">
-      <span class="ico">⚖️</span><span data-en="Weight" data-my="အလေးချိန်">Weight</span>
-    </button>
-    <button class="nav-btn" data-view="length">
-      <span class="ico">📏</span><span data-en="Distance" data-my="အကွာအဝေး">Distance</span>
-    </button>
-  </nav>
+<nav class="tabs">
+  <button class="tab active" data-tab="calc" id="tabCalc">ဂဏန်းတွက်စက်</button>
+  <button class="tab" data-tab="currency" id="tabCurrency">ငွေလဲနှုန်း</button>
+  <button class="tab" data-tab="units" id="tabUnits">ယူနစ်ပြောင်းရန်</button>
+</nav>
 
-  <!-- SCIENTIFIC CALCULATOR -->
-  <section class="view active" id="view-calc">
-    <div class="screen">
-      <div class="hint" id="screenHint">Scientific Calculator</div>
-      <input id="expression" type="text" inputmode="none"
-        autocomplete="off" spellcheck="false" placeholder="0"
-        aria-label="Expression">
-      <div id="result" aria-live="polite">0</div>
+<section id="page-calc" class="page">
+<div class="panel">
+  <div class="display">
+    <div class="expression" id="expression" aria-live="polite">0</div>
+    <div class="result" id="result" aria-live="polite">0</div>
+  </div>
+  <div class="tools">
+    <div class="toolgroup">
+      <button class="pill" id="angle">ဒီဂရီ (DEG)</button>
+      <button class="pill" id="sciToggle">သိပ္ပံ (SCI)</button>
     </div>
+    <div class="toolgroup"><button class="pill" id="backspace">⌫ ဖျက်</button><button class="pill" id="copyResult">ကူးယူ</button></div>
+  </div>
+  <div id="science">
+    <button class="key fn" data-insert="sin(">sin</button><button class="key fn" data-insert="cos(">cos</button><button class="key fn" data-insert="tan(">tan</button><button class="key fn" data-insert="sqrt(">√</button><button class="key fn" data-insert="π">π</button>
+    <button class="key fn" data-insert="log(">log</button><button class="key fn" data-insert="ln(">ln</button><button class="key fn" data-insert="^2">x²</button><button class="key fn" data-insert="^">xʸ</button><button class="key fn" data-action="factorial">x!</button>
+  </div>
+  <div class="keys">
+    <button class="key clear" data-action="clear">AC</button><button class="key op" data-insert="(">(</button><button class="key op" data-insert=")">)</button><button class="key op" data-insert="÷">÷</button>
+    <button class="key" data-insert="7">7</button><button class="key" data-insert="8">8</button><button class="key" data-insert="9">9</button><button class="key op" data-insert="×">×</button>
+    <button class="key" data-insert="4">4</button><button class="key" data-insert="5">5</button><button class="key" data-insert="6">6</button><button class="key op" data-insert="-">−</button>
+    <button class="key" data-insert="1">1</button><button class="key" data-insert="2">2</button><button class="key" data-insert="3">3</button><button class="key op" data-insert="+">+</button>
+    <button class="key" data-insert="±" data-action="sign">±</button><button class="key" data-insert="0">0</button><button class="key" data-insert=".">.</button><button class="key eq" data-action="equals">=</button>
+  </div>
+  <p class="note" id="calcNote">မှတ်ချက် — SCI ကိုဖွင့်လျှင် သိပ္ပံတွက်ချက်မှု ခလုတ်များ ပေါ်လာမည်။</p>
+</div>
+</section>
 
-    <div class="toolbar">
-      <div class="mode">
-        <button class="small-btn active" id="deg">DEG</button>
-        <button class="small-btn" id="rad">RAD</button>
-      </div>
-      <button class="small-btn" id="deleteBtn">⌫ DEL</button>
-    </div>
+<section id="page-currency" class="page hidden">
+<div class="panel">
+  <h2 class="section-title" id="currencyTitle">ငွေကြေးလဲလှယ်စက်</h2>
+  <div class="field"><label id="amountLabel" for="amount">ငွေပမာဏ</label><input id="amount" type="number" inputmode="decimal" value="1" min="0" step="any"></div>
+  <div class="two">
+    <div class="field"><label id="fromLabel" for="from">မှ</label><select id="from"></select></div>
+    <div class="field"><label id="toLabel" for="to">သို့</label><select id="to"></select></div>
+  </div>
+  <button class="action" id="convertCurrency">ငွေလဲတွက်ချက်မည်</button>
+  <div class="output" id="currencyOutput" aria-live="polite">ရလဒ်ကို ဤနေရာတွင် ပြပါမည်။</div>
+  <p class="note" id="currencyNote">ဤငွေလဲနှုန်းများသည် အော့ဖ်လိုင်း နမူနာနှုန်းထားများဖြစ်ပြီး တကယ့်အချိန်နှင့်တပြေးညီ နှုန်းထားများ မဟုတ်ပါ။</p>
+  <details style="margin-top:14px"><summary id="ratesSummary">နမူနာငွေလဲနှုန်းများကို ပြင်ရန်</summary>
+    <p class="note" id="ratesHint">နှုန်းထားကို 1 USD နှင့်ညီမျှသော တန်ဖိုးအဖြစ် ထည့်ပါ။ ပြင်ပြီး သိမ်းဆည်းနိုင်သည်။</p>
+    <div id="ratesEditor"></div><button class="action secondary" id="saveRates" style="margin-top:10px">နှုန်းထားသိမ်းမည်</button>
+  </details>
+</div>
+</section>
 
-    <div class="grid" id="keys">
-      <button class="key fn" data-v="sin(">sin</button>
-      <button class="key fn" data-v="cos(">cos</button>
-      <button class="key fn" data-v="tan(">tan</button>
-      <button class="key fn" data-v="log(">log</button>
-      <button class="key fn" data-v="ln(">ln</button>
-
-      <button class="key fn" data-v="sqrt(">√</button>
-      <button class="key fn" data-v="^2">x²</button>
-      <button class="key fn" data-v="^">xʸ</button>
-      <button class="key fn" data-v="pi">π</button>
-      <button class="key fn" data-v="(">(</button>
-
-      <button class="key fn" data-v=")">)</button>
-      <button class="key fn" data-v="abs(">abs</button>
-      <button class="key danger" data-action="clear">AC</button>
-      <button class="key danger" data-action="delete">DEL</button>
-      <button class="key op" data-v="÷">÷</button>
-
-      <button class="key" data-v="7">7</button>
-      <button class="key" data-v="8">8</button>
-      <button class="key" data-v="9">9</button>
-      <button class="key op" data-v="%">%</button>
-      <button class="key op" data-v="×">×</button>
-
-      <button class="key" data-v="4">4</button>
-      <button class="key" data-v="5">5</button>
-      <button class="key" data-v="6">6</button>
-      <button class="key op" data-v="−">−</button>
-      <button class="key op" data-v="+">+</button>
-
-      <button class="key" data-v="1">1</button>
-      <button class="key" data-v="2">2</button>
-      <button class="key" data-v="3">3</button>
-      <button class="key" data-v="00">00</button>
-      <button class="key" data-v="0">0</button>
-
-      <button class="key" data-v=".">.</button>
-      <button class="key fn" data-v="!">n!</button>
-      <button class="key fn" data-v="e">e</button>
-      <button class="key op" data-v="÷">÷</button>
-      <button class="key equal" data-action="equals">=</button>
-    </div>
-  </section>
-
-  <!-- WEIGHT CONVERTER -->
-  <section class="view" id="view-weight">
-    <div class="panel">
-      <h2 data-en="Weight Converter" data-my="အလေးချိန် ပြောင်းစက်">Weight Converter</h2>
-      <div class="subtitle" data-en="Viss, kyattha, pounds and metric units" data-my="ပိဿာ၊ ကျပ်သား၊ ပေါင်နှင့် မက်ထရစ်ယူနစ်များ">Viss, kyattha, pounds and metric units</div>
-
-      <label class="field-label" for="weightValue" data-en="Enter amount" data-my="တန်ဖိုးထည့်ပါ">Enter amount</label>
-      <input class="field" id="weightValue" type="number" inputmode="decimal" min="0" step="any" value="1">
-
-      <div class="unit-row">
-        <div>
-          <label class="field-label" for="weightFrom" data-en="From" data-my="မှ">From</label>
-          <select class="select" id="weightFrom"></select>
-        </div>
-        <div>
-          <label class="field-label" for="weightTo" data-en="To" data-my="သို့">To</label>
-          <select class="select" id="weightTo"></select>
-        </div>
-      </div>
-      <div class="swap-row">
-        <button class="swap" id="weightSwap" aria-label="Swap units">⇅</button>
-      </div>
-      <div class="result-box">
-        <div class="result-label" data-en="Converted result" data-my="ပြောင်းလဲပြီးရလဒ်">Converted result</div>
-        <div class="converter-result" id="weightResult">1.63293 kg</div>
-      </div>
-      <button class="full-btn" id="weightReset" data-en="Reset" data-my="ပြန်စမည်">Reset</button>
-      <div class="note" data-en="Standard used: 1 viss = 100 kyattha ≈ 1.63293 kg. Traditional local measures can vary slightly." data-my="သတ်မှတ်စံနှုန်း - ၁ ပိဿာ = ၁၀၀ ကျပ်သား ≈ ၁.၆၃၂၉၃ ကီလိုဂရမ်။ ဒေသအလိုက် တိုင်းတာမှု အနည်းငယ်ကွာခြားနိုင်သည်။">Standard used: 1 viss = 100 kyattha ≈ 1.63293 kg.</div>
-    </div>
-  </section>
-
-  <!-- LENGTH CONVERTER -->
-  <section class="view" id="view-length">
-    <div class="panel">
-      <h2 data-en="Distance & Length" data-my="အကွာအဝေးနှင့် အလျား">Distance & Length</h2>
-      <div class="subtitle" data-en="Meters, kilometers, feet, miles and more" data-my="မီတာ၊ ကီလိုမီတာ၊ ပေ၊ မိုင်နှင့် အခြားယူနစ်များ">Meters, kilometers, feet, miles and more</div>
-
-      <label class="field-label" for="lengthValue" data-en="Enter amount" data-my="တန်ဖိုးထည့်ပါ">Enter amount</label>
-      <input class="field" id="lengthValue" type="number" inputmode="decimal" min="0" step="any" value="1">
-
-      <div class="unit-row">
-        <div>
-          <label class="field-label" for="lengthFrom" data-en="From" data-my="မှ">From</label>
-          <select class="select" id="lengthFrom"></select>
-        </div>
-        <div>
-          <label class="field-label" for="lengthTo" data-en="To" data-my="သို့">To</label>
-          <select class="select" id="lengthTo"></select>
-        </div>
-      </div>
-      <div class="swap-row">
-        <button class="swap" id="lengthSwap" aria-label="Swap units">⇅</button>
-      </div>
-      <div class="result-box">
-        <div class="result-label" data-en="Converted result" data-my="ပြောင်းလဲပြီးရလဒ်">Converted result</div>
-        <div class="converter-result" id="lengthResult">1000 m</div>
-      </div>
-      <button class="full-btn" id="lengthReset" data-en="Reset" data-my="ပြန်စမည်">Reset</button>
-      <div class="note" data-en="Conversions use standard international units." data-my="အပြည်ပြည်ဆိုင်ရာ စံယူနစ်များအတိုင်း တွက်ချက်ထားသည်။">Conversions use standard international units.</div>
-    </div>
-  </section>
-
-  <footer class="footer">Pro Calculator EN/MM · Scientific & Unit Converter</footer>
-</main>
-
+<section id="page-units" class="page hidden">
+<div class="panel">
+  <h2 class="section-title" id="unitsTitle">ယူနစ်ပြောင်းလဲစက်</h2>
+  <div class="field"><label id="kindLabel" for="kind">အမျိုးအစား</label><select id="kind"><option value="weight">အလေးချိန်</option><option value="distance">အကွာအဝေး</option></select></div>
+  <div class="field"><label id="unitAmountLabel" for="unitAmount">ပမာဏ</label><input id="unitAmount" type="number" inputmode="decimal" value="1" step="any"></div>
+  <div class="two">
+    <div class="field"><label id="unitFromLabel" for="unitFrom">မှ</label><select id="unitFrom"></select></div>
+    <div class="field"><label id="unitToLabel" for="unitTo">သို့</label><select id="unitTo"></select></div>
+  </div>
+  <button class="action" id="convertUnits">ပြောင်းလဲတွက်ချက်မည်</button>
+  <div class="output" id="unitOutput" aria-live="polite">ရလဒ်ကို ဤနေရာတွင် ပြပါမည်။</div>
+</div>
+</section>
+<footer>Pro Calculator · အော့ဖ်လိုင်းအခြေခံတွက်ချက်မှု</footer>
+</div>
 <script>
-"use strict";
-
-// ---------- LANGUAGE ----------
-let language = "en";
-
-function updateLanguage() {
-  document.documentElement.lang = language;
-  document.querySelectorAll("[data-en][data-my]").forEach(el => {
-    el.textContent = el.dataset[language];
-  });
-  document.getElementById("langBtn").textContent =
-    language === "en" ? "မြန်မာ" : "English";
-  document.getElementById("screenHint").textContent =
-    language === "en" ? "Scientific Calculator" : "သိပ္ပံနည်းကျ ဂဏန်းတွက်စက်";
-  populateUnits("weight");
-  populateUnits("length");
-  convert("weight");
-  convert("length");
-}
-
-document.getElementById("langBtn").addEventListener("click", () => {
-  language = language === "en" ? "my" : "en";
-  updateLanguage();
-});
-
-// ---------- NAVIGATION ----------
-document.querySelectorAll(".nav-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-    btn.classList.add("active");
-    document.getElementById("view-" + btn.dataset.view).classList.add("active");
-  });
-});
-
-// ---------- SCIENTIFIC CALCULATOR ----------
-const expression = document.getElementById("expression");
-const result = document.getElementById("result");
-let angleMode = "DEG";
-let justEvaluated = false;
-
-function factorial(n) {
-  if (!Number.isInteger(n) || n < 0 || n > 170)
-    throw Error("Factorial accepts integers from 0 to 170");
-  let out = 1;
-  for (let i = 2; i <= n; i++) out *= i;
-  return out;
-}
-
-// Safe parser: avoids eval() and Function().
-function calculate(source) {
-  let s = source.replace(/×/g, "*")
-    .replace(/÷/g, "/")
-    .replace(/−/g, "-")
-    .replace(/π/g, "pi")
-    .replace(/\s/g, "");
-
-  if (!s) return 0;
-  if (s.length > 300) throw Error("Expression too long");
-
-  const tokens = s.match(
-    /(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?|[a-zA-Z]+|[()+\-*/%^!,]/gi
-  );
-
-  if (!tokens || tokens.join("") !== s) throw Error("Invalid expression");
-
-  let pos = 0;
-  const peek = () => tokens[pos];
-  const take = () => tokens[pos++];
-
-  function primary() {
-    const t = take();
-    if (t === undefined) throw Error("Incomplete expression");
-    if (t === "+") return unary();
-    if (t === "-") return -unary();
-
-    if (t === "(") {
-      const value = addSub();
-      if (take() !== ")") throw Error("Missing )");
-      return value;
-    }
-
-    if (/^(?:\d|\.)/.test(t)) return Number(t);
-
-    if (/^[a-z]+$/i.test(t)) {
-      const name = t.toLowerCase();
-      if (name === "pi") return Math.PI;
-      if (name === "e") return Math.E;
-      if (take() !== "(") throw Error("Use " + name + "(...)");
-
-      const v = addSub();
-      if (take() !== ")") throw Error("Missing )");
-
-      switch (name) {
-        case "sin": return Math.sin(angleMode === "DEG" ? v * Math.PI / 180 : v);
-        case "cos": return Math.cos(angleMode === "DEG" ? v * Math.PI / 180 : v);
-        case "tan":
-          if (angleMode === "DEG" &&
-              Math.abs(Math.cos(v * Math.PI / 180)) < 1e-12)
-            throw Error("Undefined");
-          return Math.tan(angleMode === "DEG" ? v * Math.PI / 180 : v);
-        case "log":
-          if (v <= 0) throw Error("Invalid log");
-          return Math.log10(v);
-        case "ln":
-          if (v <= 0) throw Error("Invalid ln");
-          return Math.log(v);
-        case "sqrt":
-          if (v < 0) throw Error("Invalid square root");
-          return Math.sqrt(v);
-        case "abs": return Math.abs(v);
-        default: throw Error("Unknown function");
-      }
-    }
-    throw Error("Invalid expression");
-  }
-
-  function postfix(v) {
-    while (peek() === "!" || peek() === "%") {
-      const op = take();
-      if (op === "!") v = factorial(v);
-      if (op === "%") v /= 100;
-    }
-    return v;
-  }
-
-  function power() {
-    let v = postfix(primary());
-    if (peek() === "^") {
-      take();
-      v = Math.pow(v, unary());
-    }
-    return v;
-  }
-
-  function unary() { return power(); }
-
-  function multiply() {
-    let v = unary();
-    while (peek() === "*" || peek() === "/") {
-      const op = take(), r = unary();
-      if (op === "/" && r === 0) throw Error("Cannot divide by zero");
-      v = op === "*" ? v * r : v / r;
-    }
-    return v;
-  }
-
-  function addSub() {
-    let v = multiply();
-    while (peek() === "+" || peek() === "-") {
-      const op = take(), r = multiply();
-      v = op === "+" ? v + r : v - r;
-    }
-    return v;
-  }
-
-  const value = addSub();
-  if (pos !== tokens.length) throw Error("Check expression");
-  if (!Number.isFinite(value)) throw Error("Math error");
-  return Object.is(value, -0) ? 0 : value;
-}
-
-function preview() {
-  if (!expression.value.trim()) {
-    result.textContent = "0";
-    return;
-  }
-  try {
-    const n = calculate(expression.value);
-    result.textContent = Number(n.toPrecision(12)).toString();
-  } catch {
-    result.textContent = "…";
-  }
-}
-
-function insert(value) {
-  if (justEvaluated && /^(?:[0-9.]|pi$|e$|sin\(|cos\(|tan\(|sqrt\(|log\(|ln\()/.test(value)) {
-    expression.value = "";
-  }
-  justEvaluated = false;
-  const start = expression.selectionStart ?? expression.value.length;
-  const end = expression.selectionEnd ?? expression.value.length;
-  expression.setRangeText(value, start, end, "end");
-  preview();
-}
-
-function erase() {
-  const start = expression.selectionStart ?? expression.value.length;
-  const end = expression.selectionEnd ?? expression.value.length;
-  if (start !== end) expression.setRangeText("", start, end, "end");
-  else if (start > 0) expression.setRangeText("", start - 1, start, "end");
-  justEvaluated = false;
-  preview();
-}
-
-function clearCalc() {
-  expression.value = "";
-  result.textContent = "0";
-  justEvaluated = false;
-}
-
-function equals() {
-  try {
-    const n = calculate(expression.value);
-    const clean = Number(n.toPrecision(12)).toString();
-    result.textContent = clean;
-    expression.value = clean;
-    justEvaluated = true;
-  } catch (e) {
-    result.textContent = e.message || "Math error";
-  }
-}
-
-document.getElementById("keys").addEventListener("click", event => {
-  const btn = event.target.closest("button");
-  if (!btn) return;
-  if (btn.dataset.action === "clear") return clearCalc();
-  if (btn.dataset.action === "delete") return erase();
-  if (btn.dataset.action === "equals") return equals();
-  insert(btn.dataset.v);
-});
-
-document.getElementById("deleteBtn").addEventListener("click", erase);
-
-document.getElementById("deg").addEventListener("click", () => {
-  angleMode = "DEG";
-  document.getElementById("deg").classList.add("active");
-  document.getElementById("rad").classList.remove("active");
-  preview();
-});
-
-document.getElementById("rad").addEventListener("click", () => {
-  angleMode = "RAD";
-  document.getElementById("rad").classList.add("active");
-  document.getElementById("deg").classList.remove("active");
-  preview();
-});
-
-expression.addEventListener("input", () => {
-  justEvaluated = false;
-  preview();
-});
-expression.addEventListener("keydown", event => {
-  if (event.key === "Enter" || event.key === "=") {
-    event.preventDefault();
-    equals();
-  }
-  if (event.key === "Escape") clearCalc();
-});
-
-// ---------- UNIT DATA ----------
-// Each factor is the number of grams or meters in one unit.
-const weightUnits = [
-  {id:"viss", factor:1632.93, en:"Viss (ပိဿာ)", my:"ပိဿာ (Viss)"},
-  {id:"kyattha", factor:16.3293, en:"Kyattha (ကျပ်သား)", my:"ကျပ်သား (Kyattha)"},
-  {id:"kg", factor:1000, en:"Kilogram (kg)", my:"ကီလိုဂရမ် (kg)"},
-  {id:"g", factor:1, en:"Gram (g)", my:"ဂရမ် (g)"},
-  {id:"lb", factor:453.59237, en:"Pound (lb)", my:"ပေါင် (lb)"},
-  {id:"oz", factor:28.349523125, en:"Ounce (oz)", my:"အောင်စ (oz)"},
-  {id:"mg", factor:0.001, en:"Milligram (mg)", my:"မီလီဂရမ် (mg)"}
+const $=id=>document.getElementById(id);
+let lang='my', angleMode='DEG', expression='', justEvaluated=false;
+const currencyData=[
+['USD','အမေရိကန် ဒေါ်လာ','US Dollar',1],['MMK','မြန်မာ ကျပ်','Myanmar Kyat',2100],['THB','ထိုင်း ဘတ်','Thai Baht',36.5],['INR','အိန္ဒိယ ရူပီး','Indian Rupee',83.5],['SGD','စင်ကာပူ ဒေါ်လာ','Singapore Dollar',1.35],['MYR','မလေးရှား ရင်းဂစ်','Malaysian Ringgit',4.7],['CNY','တရုတ် ယွမ်','Chinese Yuan',7.2],['EUR','ယူရို','Euro',.92],['GBP','ဗြိတိန် ပေါင်','British Pound',.79],['JPY','ဂျပန် ယန်း','Japanese Yen',150],['KRW','ကိုရီးယား ဝမ်','South Korean Won',1350],['AED','ယူအေအီး ဒရမ်','UAE Dirham',3.67],['AUD','ဩစတြေးလျ ဒေါ်လာ','Australian Dollar',1.52],['CAD','ကနေဒါ ဒေါ်လာ','Canadian Dollar',1.36],['PHP','ဖိလစ်ပိုင် ပီဆို','Philippine Peso',56],['IDR','အင်ဒိုနီးရှား ရူပီးယား','Indonesian Rupiah',15800],['VND','ဗီယက်နမ် ဒေါင်','Vietnamese Dong',25000],['NPR','နီပေါ ရူပီး','Nepalese Rupee',133],['PKR','ပါကစ္စတန် ရူပီး','Pakistani Rupee',278],['BDT','ဘင်္ဂလားဒေ့ရှ် တာကာ','Bangladeshi Taka',110],['CHF','ဆွစ် ဖရန့်','Swiss Franc',.88],['NZD','နယူးဇီလန် ဒေါ်လာ','New Zealand Dollar',1.64],['HKD','ဟောင်ကောင် ဒေါ်လာ','Hong Kong Dollar',7.8],['SAR','ဆော်ဒီ ရီယဲလ်','Saudi Riyal',3.75],['BRL','ဘရာဇီး ရီးယဲလ်','Brazilian Real',5.1],['TRY','တူရကီ လီရာ','Turkish Lira',32],['ZAR','တောင်အာဖရိက ရန်း','South African Rand',18.5]
 ];
-
-const lengthUnits = [
-  {id:"km", factor:1000, en:"Kilometer (km)", my:"ကီလိုမီတာ (km)"},
-  {id:"m", factor:1, en:"Meter (m)", my:"မီတာ (m)"},
-  {id:"cm", factor:0.01, en:"Centimeter (cm)", my:"စင်တီမီတာ (cm)"},
-  {id:"mm", factor:0.001, en:"Millimeter (mm)", my:"မီလီမီတာ (mm)"},
-  {id:"mile", factor:1609.344, en:"Mile (mi)", my:"မိုင် (mi)"},
-  {id:"yard", factor:0.9144, en:"Yard (yd)", my:"ကိုက် (yd)"},
-  {id:"ft", factor:0.3048, en:"Foot (ft)", my:"ပေ (ft)"},
-  {id:"in", factor:0.0254, en:"Inch (in)", my:"လက်မ (in)"}
-];
-
-function unitList(type) {
-  return type === "weight" ? weightUnits : lengthUnits;
+let rates={};try{rates=JSON.parse(localStorage.getItem('proCalculatorOfflineRatesV3')||'{}')}catch(e){}
+currencyData.forEach(c=>{if(!(c[0] in rates))rates[c[0]]=c[3]});
+const unitData={
+weight:[['mg','မီလီဂရမ်','Milligram',.000001],['g','ဂရမ်','Gram',.001],['kg','ကီလိုဂရမ်','Kilogram',1],['t','မက်ထရစ်တန်','Metric tonne',1000],['lb','ပေါင်','Pound',.45359237],['oz','အောင်စ','Ounce',.028349523125]],
+distance:[['mm','မီလီမီတာ','Millimeter',.001],['cm','စင်တီမီတာ','Centimeter',.01],['m','မီတာ','Meter',1],['km','ကီလိုမီတာ','Kilometer',1000],['in','လက်မ','Inch',.0254],['ft','ပေ','Foot',.3048],['yd','ကိုက်','Yard',.9144],['mi','မိုင်','Mile',1609.344]]
+};
+const words={
+my:{subtitle:'နေ့စဉ်တွက်ချက်မှုအတွက်',tabCalc:'ဂဏန်းတွက်စက်',tabCurrency:'ငွေလဲနှုန်း',tabUnits:'ယူနစ်ပြောင်းရန်',angleDeg:'ဒီဂရီ (DEG)',angleRad:'ရေဒီယန် (RAD)',sci:'သိပ္ပံ (SCI)',backspace:'⌫ ဖျက်',copy:'ကူးယူ',calcNote:'မှတ်ချက် — သိပ္ပံခလုတ်များကို ဖွင့်/ပိတ်ရန် “သိပ္ပံ (SCI)” ကိုနှိပ်ပါ။',currencyTitle:'ငွေကြေးလဲလှယ်စက်',amount:'ငွေပမာဏ',from:'မှ',to:'သို့',convertCurrency:'ငွေလဲတွက်ချက်မည်',currencyOutput:'ရလဒ်ကို ဤနေရာတွင် ပြပါမည်။',currencyNote:'ဤငွေလဲနှုန်းများသည် အော့ဖ်လိုင်း နမူနာနှုန်းထားများဖြစ်ပြီး တကယ့်အချိန်နှင့်တပြေးညီ နှုန်းထားများ မဟုတ်ပါ။',ratesSummary:'နမူနာငွေလဲနှုန်းများကို ပြင်ရန်',ratesHint:'နှုန်းထားကို 1 USD နှင့်ညီမျှသော တန်ဖိုးအဖြစ် ထည့်ပါ။ ပြင်ပြီး သိမ်းဆည်းနိုင်သည်။',saveRates:'နှုန်းထားသိမ်းမည်',unitsTitle:'ယူနစ်ပြောင်းလဲစက်',kind:'အမျိုးအစား',weight:'အလေးချိန်',distance:'အကွာအဝေး',unitAmount:'ပမာဏ',convertUnits:'ပြောင်းလဲတွက်ချက်မည်',unitOutput:'ရလဒ်ကို ဤနေရာတွင် ပြပါမည်။',copied:'ရလဒ်ကို ကူးယူပြီးပါပြီ။',error:'တွက်ချက်၍မရပါ',invalid:'မှန်ကန်သော ပမာဏကို ထည့်ပါ။',saved:'နှုန်းထားများ သိမ်းဆည်းပြီးပါပြီ။',currencyNames:'my',unitNames:'my'},
+en:{subtitle:'Everyday calculations made simple',tabCalc:'Calculator',tabCurrency:'Currency',tabUnits:'Unit Converter',angleDeg:'Degrees (DEG)',angleRad:'Radians (RAD)',sci:'Scientific (SCI)',backspace:'⌫ Delete',copy:'Copy',calcNote:'Tip — Tap Scientific (SCI) to show or hide scientific functions.',currencyTitle:'Currency Converter',amount:'Amount',from:'From',to:'To',convertCurrency:'Convert Currency',currencyOutput:'Your result will appear here.',currencyNote:'These are offline sample rates, not live market exchange rates.',ratesSummary:'Edit sample exchange rates',ratesHint:'Enter each currency value relative to 1 USD. You can edit and save these values.',saveRates:'Save Rates',unitsTitle:'Unit Converter',kind:'Category',weight:'Weight',distance:'Distance',unitAmount:'Amount',convertUnits:'Convert Units',unitOutput:'Your result will appear here.',copied:'Result copied.',error:'Could not calculate',invalid:'Please enter a valid amount.',saved:'Rates saved.',currencyNames:'en',unitNames:'en'}
+};
+function t(k){return words[lang][k]||k}
+function fmt(n){if(!Number.isFinite(n))return 'Error';return Number(n.toPrecision(12)).toLocaleString(lang==='my'?'en-US':'en-US',{maximumFractionDigits:10})}
+function currencyName(c){return lang==='my'?c[1]:c[2]}
+function unitName(u){return lang==='my'?u[1]:u[2]}
+function renderCurrencySelects(){['from','to'].forEach(id=>{const s=$(id),old=s.value;s.innerHTML='';currencyData.forEach(c=>{const o=document.createElement('option');o.value=c[0];o.textContent=`${c[0]} — ${currencyName(c)}`;s.appendChild(o)});s.value=old||(id==='from'?'USD':'MMK')});}
+function renderRatesEditor(){const wrap=$('ratesEditor');wrap.innerHTML='';currencyData.forEach(c=>{const row=document.createElement('div');row.className='two';row.style.marginTop='8px';const lab=document.createElement('label');lab.textContent=`${c[0]} — ${currencyName(c)}`;lab.style.alignSelf='center';const input=document.createElement('input');input.type='number';input.min='0.00000001';input.step='any';input.value=rates[c[0]];input.dataset.rate=c[0];input.setAttribute('aria-label',c[0]);row.append(lab,input);wrap.append(row)})}
+function renderUnitSelects(){const type=$('kind').value;['unitFrom','unitTo'].forEach((id,idx)=>{const s=$(id),old=s.value;s.innerHTML='';unitData[type].forEach(u=>{const o=document.createElement('option');o.value=u[0];o.textContent=`${u[0]} — ${unitName(u)}`;s.append(o)});s.value=old&&unitData[type].some(u=>u[0]===old)?old:(idx===0?(type==='weight'?'kg':'km'):(type==='weight'?'lb':'mi'))})}
+function applyLanguage(){
+document.documentElement.lang=lang;$('subtitle').textContent=t('subtitle');$('tabCalc').textContent=t('tabCalc');$('tabCurrency').textContent=t('tabCurrency');$('tabUnits').textContent=t('tabUnits');$('angle').textContent=angleMode==='DEG'?t('angleDeg'):t('angleRad');$('sciToggle').textContent=t('sci');$('backspace').textContent=t('backspace');$('copyResult').textContent=t('copy');$('calcNote').textContent=t('calcNote');
+$('currencyTitle').textContent=t('currencyTitle');$('amountLabel').textContent=t('amount');$('fromLabel').textContent=t('from');$('toLabel').textContent=t('to');$('convertCurrency').textContent=t('convertCurrency');$('currencyNote').textContent=t('currencyNote');$('ratesSummary').textContent=t('ratesSummary');$('ratesHint').textContent=t('ratesHint');$('saveRates').textContent=t('saveRates');
+$('unitsTitle').textContent=t('unitsTitle');$('kindLabel').textContent=t('kind');$('unitAmountLabel').textContent=t('unitAmount');$('unitFromLabel').textContent=t('from');$('unitToLabel').textContent=t('to');$('convertUnits').textContent=t('convertUnits');
+const kind=$('kind');kind.options[0].text=t('weight');kind.options[1].text=t('distance');
+renderCurrencySelects();renderRatesEditor();renderUnitSelects();
 }
-
-function populateUnits(type) {
-  const from = document.getElementById(type + "From");
-  const to = document.getElementById(type + "To");
-  const units = unitList(type);
-  const oldFrom = from.value;
-  const oldTo = to.value;
-
-  function label(unit) {
-    return unit[language === "en" ? "en" : "my"];
-  }
-
-  from.innerHTML = "";
-  to.innerHTML = "";
-
-  units.forEach(unit => {
-    from.add(new Option(label(unit), unit.id));
-    to.add(new Option(label(unit), unit.id));
-  });
-
-  if (units.some(u => u.id === oldFrom)) from.value = oldFrom;
-  else from.value = type === "weight" ? "viss" : "km";
-
-  if (units.some(u => u.id === oldTo)) to.value = oldTo;
-  else to.value = type === "weight" ? "kg" : "m";
+function showTab(tab){document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));$('page-'+tab).classList.remove('hidden');document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab))}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+$('language').addEventListener('change',e=>{lang=e.target.value;applyLanguage()});
+$('angle').addEventListener('click',()=>{angleMode=angleMode==='DEG'?'RAD':'DEG';$('angle').textContent=angleMode==='DEG'?t('angleDeg'):t('angleRad')});
+$('sciToggle').addEventListener('click',()=>{$('science').classList.toggle('show');$('sciToggle').classList.toggle('on',$('science').classList.contains('show'))});
+function renderDisplay(){ $('expression').textContent=expression||'0'; }
+function insert(s){if(justEvaluated&&!['+','-','×','÷','^'].includes(s))expression='';justEvaluated=false;if(s==='π'&&/[0-9π)]$/.test(expression))expression+='×';if(/^[0-9.(πa-z]/i.test(s)&&/[0-9π)]$/.test(expression)&&!['sin(','cos(','tan(','sqrt(','log(','ln('].includes(s))expression+='×';expression+=s;renderDisplay();$('result').textContent=expression||'0'}
+function factorial(n){if(n<0||n>170||!Number.isInteger(n))throw Error('factorial');let r=1;for(let i=2;i<=n;i++)r*=i;return r}
+function evaluateExpression(src){
+let s=src.replace(/×/g,'*').replace(/÷/g,'/').replace(/π/g,'PI').replace(/\^/g,'**').replace(/√/g,'sqrt');
+if(!s.trim())return 0;
+const tokens=s.match(/(?:\d+(?:\.\d*)?|\.\d+|PI|sin|cos|tan|sqrt|log|ln|factorial|\*\*|[+\-*/(),!])/g);
+if(!tokens||tokens.join('')!==s.replace(/\s+/g,''))throw Error('syntax');
+let pos=0;
+function peek(){return tokens[pos]}
+function take(){return tokens[pos++]}
+function primary(){
+ const tok=take();
+ if(tok===undefined)throw Error('syntax');
+ if(tok==='+' )return primary();
+ if(tok==='-')return -primary();
+ if(tok==='('){const v=add();if(take()!==')')throw Error('paren');return v}
+ if(tok==='PI')return Math.PI;
+ if(/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(tok))return Number(tok);
+ if(['sin','cos','tan','sqrt','log','ln','factorial'].includes(tok)){
+   if(take()!=='(')throw Error('paren');const v=add();if(take()!==')')throw Error('paren');
+   if(tok==='sin')return Math.sin(angleMode==='DEG'?v*Math.PI/180:v);
+   if(tok==='cos')return Math.cos(angleMode==='DEG'?v*Math.PI/180:v);
+   if(tok==='tan')return Math.tan(angleMode==='DEG'?v*Math.PI/180:v);
+   if(tok==='sqrt')return Math.sqrt(v);if(tok==='log')return Math.log10(v);if(tok==='ln')return Math.log(v);return factorial(v);
+ }
+ throw Error('syntax');
 }
-
-function formatNumber(number) {
-  if (!Number.isFinite(number)) return "Invalid value";
-  if (number === 0) return "0";
-  return Number(number.toPrecision(12)).toLocaleString("en-US", {
-    maximumFractionDigits: 12,
-    useGrouping: true
-  });
+function power(){let v=primary();if(peek()==='**'){take();v=Math.pow(v,power())}return v}
+function mul(){let v=power();while(peek()==='*'||peek==='/'){const op=take(),r=power();v=op==='*'?v*r:v/r}return v}
+function add(){let v=mul();while(peek()==='+'||peek()==='-'){const op=take(),r=mul();v=op==='+'?v+r:v-r}return v}
+const val=add();if(pos!==tokens.length||!Number.isFinite(val))throw Error('math');return val
 }
-
-function convert(type) {
-  const input = document.getElementById(type + "Value");
-  const fromId = document.getElementById(type + "From").value;
-  const toId = document.getElementById(type + "To").value;
-  const output = document.getElementById(type + "Result");
-  const units = unitList(type);
-  const from = units.find(u => u.id === fromId);
-  const to = units.find(u => u.id === toId);
-  const value = Number(input.value);
-
-  if (input.value.trim() === "" || !Number.isFinite(value)) {
-    output.textContent = language === "en" ? "Enter a number" : "ဂဏန်းထည့်ပါ";
-    return;
-  }
-
-  const answer = value * from.factor / to.factor;
-  const unitName = toId === "viss" ? "ပိဿာ" :
-    toId === "kyattha" ? "ကျပ်သား" :
-    toId === "kg" ? "kg" :
-    toId === "g" ? "g" :
-    toId === "lb" ? "lb" :
-    toId === "oz" ? "oz" :
-    toId === "mg" ? "mg" :
-    toId === "km" ? "km" :
-    toId === "m" ? "m" :
-    toId === "cm" ? "cm" :
-    toId === "mm" ? "mm" :
-    toId === "mile" ? "mile" :
-    toId === "yard" ? "yard" :
-    toId === "ft" ? "ft" : "in";
-
-  output.textContent = formatNumber(answer) + " " + unitName;
-}
-
-function setupConverter(type, defaultFrom, defaultTo) {
-  populateUnits(type);
-  const from = document.getElementById(type + "From");
-  const to = document.getElementById(type + "To");
-  from.value = defaultFrom;
-  to.value = defaultTo;
-
-  document.getElementById(type + "Value").addEventListener("input", () => convert(type));
-  from.addEventListener("change", () => convert(type));
-  to.addEventListener("change", () => convert(type));
-
-  document.getElementById(type + "Swap").addEventListener("click", () => {
-    const previous = from.value;
-    from.value = to.value;
-    to.value = previous;
-    convert(type);
-  });
-
-  document.getElementById(type + "Reset").addEventListener("click", () => {
-    document.getElementById(type + "Value").value = 1;
-    from.value = defaultFrom;
-    to.value = defaultTo;
-    convert(type);
-  });
-
-  convert(type);
-}
-
-setupConverter("weight", "viss", "kg");
-setupConverter("length", "km", "m");
-preview();
+function calculate(){try{const v=evaluateExpression(expression);$('result').textContent=fmt(v);$('expression').textContent=expression+' =';expression=String(v);justEvaluated=true}catch(e){$('result').textContent=t('error');justEvaluated=true}}
+document.querySelectorAll('[data-insert]').forEach(b=>b.addEventListener('click',()=>insert(b.dataset.insert)));
+document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>{
+const a=b.dataset.action;
+if(a==='clear'){expression='';justEvaluated=false;$('result').textContent='0';renderDisplay()}
+if(a==='equals')calculate();
+if(a==='sign'){if(!expression)expression='-';else if(justEvaluated)expression=String(-Number(expression));else expression='-('+expression+')';justEvaluated=false;renderDisplay();$('result').textContent=expression}
+if(a==='factorial'){insert('factorial(');insert(')')}
+}));
+$('backspace').addEventListener('click',()=>{if(justEvaluated){expression='';justEvaluated=false}else expression=expression.slice(0,-1);renderDisplay();$('result').textContent=expression||'0'});
+$('copyResult').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('result').textContent);$('copyResult').textContent=t('copied');setTimeout(()=>$('copyResult').textContent=t('copy'),1200)}catch(e){$('copyResult').textContent=$('result').textContent}});
+document.addEventListener('keydown',e=>{if(!$('page-calc').classList.contains('hidden')&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)){if(/[0-9.()+\-*/]/.test(e.key)&&e.key.length===1)insert(e.key.replace('*','×').replace('/','÷'));else if(e.key==='Enter'){e.preventDefault();calculate()}else if(e.key==='Backspace')$('backspace').click()}});
+$('convertCurrency').addEventListener('click',()=>{
+const amount=Number($('amount').value),f=$('from').value,to=$('to').value;
+if(!Number.isFinite(amount)||amount<0){$('currencyOutput').textContent=t('invalid');return}
+const result=amount/rates[f]*rates[to],fromData=currencyData.find(c=>c[0]===f),toData=currencyData.find(c=>c[0]===to);
+$('currencyOutput').textContent=`${fmt(amount)} ${f} (${currencyName(fromData)}) = ${fmt(result)} ${to} (${currencyName(toData)})`;
+});
+$('saveRates').addEventListener('click',()=>{document.querySelectorAll('[data-rate]').forEach(i=>{const n=Number(i.value);if(Number.isFinite(n)&&n>0)rates[i.dataset.rate]=n});localStorage.setItem('proCalculatorOfflineRatesV3',JSON.stringify(rates));renderRatesEditor();$('saveRates').textContent=t('saved');setTimeout(()=>$('saveRates').textContent=t('saveRates'),1600)});
+$('kind').addEventListener('change',()=>{renderUnitSelects();$('unitOutput').textContent=t('unitOutput')});
+$('convertUnits').addEventListener('click',()=>{
+const amount=Number($('unitAmount').value),type=$('kind').value,from=$('unitFrom').value,to=$('unitTo').value,arr=unitData[type],f=arr.find(u=>u[0]===from),dest=arr.find(u=>u[0]===to);
+if(!Number.isFinite(amount)){$('unitOutput').textContent=t('invalid');return}
+const result=amount*f[3]/dest[3];$('unitOutput').textContent=`${fmt(amount)} ${unitName(f)} (${from}) = ${fmt(result)} ${unitName(dest)} (${to})`;
+});
+applyLanguage();renderDisplay();
 </script>
 </body>
 </html>
